@@ -4,22 +4,20 @@ Environment::Environment(): commandsHistory(), fs() {
 
     // root files
     Directory *d1 = new Directory("dir1", &fs.getRootDirectory());
-    Directory *d2 = new Directory("die2", &fs.getRootDirectory());
-    Directory *d3 = new Directory("die3", &fs.getRootDirectory());
+    Directory *d2 = new Directory("dir2", &fs.getRootDirectory());
+    Directory *d3 = new Directory("dir3", &fs.getRootDirectory());
     Directory *d4 = new Directory("dir4", &fs.getRootDirectory());
-    Directory *d5 = new Directory("die5", &fs.getRootDirectory());
-    Directory *d6 = new Directory("die6", &fs.getRootDirectory());
+    Directory *d5 = new Directory("dir5", d1);
+    Directory *d6 = new Directory("dir6", d1);
 
     fs.getRootDirectory().addFile(d1);
     fs.getRootDirectory().addFile(d2);
     fs.getRootDirectory().addFile(d3);
-    fs.getRootDirectory().addFile(d1);
+    fs.getRootDirectory().addFile(d4);
+    d1->addFile(d5);
+    d1->addFile(d6);
+    d1->addFile(new File("file4", 12));
     d1->addFile(new File("file3", 12));
-    d2->addFile(new File("file4", 5));
-
-
-    fs.getRootDirectory().findChild("dir1")->addFile(new File("file3", 12));
-
 
 
 }
@@ -32,10 +30,11 @@ void Environment::start() {
                 PwdCommand(command).execute(fs);
             } else if(cType == "cd") {
                 CdCommand(command).execute(fs);
+            } else if(cType == "ls") {
+                LsCommand(command).execute(fs);
             }
         }
         cout << fs.getWorkingDirectory().getAbsolutePath() << ">";
-        //TODO: CHANGE TO THIS! for multi-word input
         getline(cin, command);
     }
 }

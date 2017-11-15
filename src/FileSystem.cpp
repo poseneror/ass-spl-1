@@ -6,7 +6,6 @@ Directory& FileSystem::getRootDirectory() const {
     return *rootDirectory;
 }
 
-// TODO: ADD THIS
 Directory& FileSystem::getWorkingDirectory() const {
     return *workingDirectory;
 }

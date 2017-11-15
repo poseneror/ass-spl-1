@@ -42,6 +42,7 @@ public:
 	void removeFile(BaseFile* file); // Remove the file from children
 	void sortByName(); // Sort children by name alphabetically (not recursively)
 	void sortBySize(); // Sort children by size (not recursively)
+	void sortBySizeName(); // Sort children by size and than name
 	vector<BaseFile*> getChildren(); // Return children
 	int getSize(); // Return the size of the directory (recursively)
 	string getAbsolutePath();  //Return the path from the root to this

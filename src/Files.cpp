@@ -49,6 +49,7 @@ void Directory::removeFile(BaseFile* file){
     }
 }
 
+//TODO: sort be size also
 bool nameComp(BaseFile *f1, BaseFile *f2){
     return (f1 -> getName() < f2 -> getName());
 }
@@ -57,12 +58,24 @@ bool sizeComp(BaseFile *f1, BaseFile *f2){
     return (f1 -> getSize() < f2 -> getSize());
 }
 
+bool sizeNameComp(BaseFile *f1, BaseFile *f2){
+    if(f1 -> getSize() == f2 ->getSize()){
+        return nameComp(f1, f2);
+    } else {
+        return sizeComp(f1, f2);
+    }
+}
+
 void Directory::sortByName(){
     std::sort(children.begin(), children.end(), nameComp);
 }
 
 void Directory::sortBySize(){
     std::sort(children.begin(), children.end(), sizeComp);
+}
+
+void Directory::sortBySizeName() {
+    std::sort(children.begin(), children.end(), sizeNameComp);
 }
 
 vector<BaseFile*> Directory::getChildren(){
@@ -74,13 +87,13 @@ int Directory::getSize(){
     for(vector<BaseFile*>::iterator it = children.begin(); it != children.end(); ++it){
         sum += (*it) -> getSize();
     }
+    return sum;
 }
 
 string Directory::getAbsolutePath(){
     if( getParent() == nullptr ){
         return "/";
     }
-    //TODO: to match the expected / in the begining
     if(getParent()->getParent() == nullptr){
         return (getParent()->getAbsolutePath()).append(getName());
     }
