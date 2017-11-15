@@ -1,6 +1,4 @@
 #include "Commands.h"
-#include "FileSystem.h"
-#include "Files.h"
 #include <algorithm>
 
 BaseFile::BaseFile(string name): name(name) {}
@@ -23,7 +21,7 @@ bool File::isFile() { return true; }
 
 Directory::Directory(string name, Directory *parent): BaseFile(name), parent(parent), children(){}
 
-Directory *Directory::Directory::getParent() const{
+Directory *Directory::getParent() const{
     return parent;
 }
 
@@ -80,7 +78,11 @@ int Directory::getSize(){
 
 string Directory::getAbsolutePath(){
     if( getParent() == nullptr ){
-        return getName().insert(0, "/");
+        return "/";
+    }
+    //TODO: to match the expected / in the begining
+    if(getParent()->getParent() == nullptr){
+        return (getParent()->getAbsolutePath()).append(getName());
     }
     return (getParent()->getAbsolutePath()).append("/").append(getName());
 }
