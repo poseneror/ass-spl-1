@@ -32,7 +32,26 @@ void Environment::start() {
                 CdCommand(command).execute(fs);
             } else if(cType == "ls") {
                 LsCommand(command).execute(fs);
+            } else if(cType == "mkdir"){
+                MkdirCommand(command).execute(fs);
+            } else if(cType == "mkfile"){
+                MkfileCommand(command).execute(fs);
+            } else if(cType == "cp"){
+                CpCommand(command).execute(fs);
+            } else if(cType == "mv"){
+                MvCommand(command).execute(fs);
+            } else if(cType == "rename"){
+                RenameCommand(command).execute(fs);
+            } else if(cType == "rm") {
+                RmCommand(command).execute(fs);
             }
+//            } else if(cType == "history"){
+//                HistoryCommand(command).execute(fs);
+//            } else if(cType == "verbose"){
+//                VerboseCommand(command).execute(fs);
+//            } else if(cType == "exec"){
+//                ExecCommand(command).execute(fs);
+//            }
         }
         cout << fs.getWorkingDirectory().getAbsolutePath() << ">";
         getline(cin, command);

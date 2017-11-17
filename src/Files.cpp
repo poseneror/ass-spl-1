@@ -11,6 +11,8 @@ void BaseFile::setName(string newName){
     name = newName;
 }
 
+BaseFile::~BaseFile() {};
+
 File::File(string name, int size): BaseFile(name), size(size) {}
 
 int File::getSize(){
@@ -19,6 +21,8 @@ int File::getSize(){
 
 bool File::isFile() { return true; }
 
+File::~File() {}
+
 Directory::Directory(string name, Directory *parent): BaseFile(name), parent(parent), children(){}
 
 Directory *Directory::getParent() const{
@@ -26,7 +30,9 @@ Directory *Directory::getParent() const{
 }
 
 void Directory::setParent(Directory *newParent){
+    parent -> removeFile(this);
     parent = newParent;
+    parent -> addFile(this);
 }
 
 void Directory::addFile(BaseFile* file){
@@ -41,15 +47,15 @@ void Directory::removeFile(string name){
     }
 }
 
+//TODO: why like this
 void Directory::removeFile(BaseFile* file){
-    for(vector<BaseFile*>::iterator it = children.begin(); it != children.end(); ++it){
+    for(vector<BaseFile*>::iterator it = children.begin(); *it != nullptr && it != children.end(); ++it){
         if(*it == file){
             children.erase(it);
         }
     }
 }
 
-//TODO: sort be size also
 bool nameComp(BaseFile *f1, BaseFile *f2){
     return (f1 -> getName() < f2 -> getName());
 }
@@ -106,10 +112,65 @@ bool Directory::isFile(){
 
 // this method looks for a child with the specified name,
 // returns a pointer to the child or a null pointer if it is not found
-Directory* Directory::findChild(string childName) {
+BaseFile* Directory::findChild(string childName) {
     for(vector<BaseFile*>::iterator it = children.begin(); it != children.end(); ++it){
-        if(((*it) -> getName()) == childName && !((*it) -> isFile()))
-            return (Directory*) (*it);
+        if(((*it) -> getName()) == childName)
+            return *it;
     }
     return nullptr;
+}
+
+void Directory::clear(){
+    // clear children
+    for(vector<BaseFile*>::iterator it = children.begin(); it != children.end(); ++it){
+        delete (*it);
+    }
+    // remove from parent
+    if(this->parent != nullptr){
+        parent->removeFile(this);
+    }
+}
+
+void Directory::copy(const Directory &other) {
+    setName(other.getName());
+    parent = other.parent;
+    // copy children
+    for(vector<BaseFile*>::const_iterator it = other.children.begin(); it != other.children.end(); ++it){
+        if((*it)->isFile()){
+            children.push_back(new File(((File*)(*it)) -> getName(), ((File*)(*it)) -> getSize()));
+        } else {
+            children.push_back(new Directory(*((Directory *)(*it))));
+            ((Directory *)children.back()) -> setParent(this);
+        }
+    }
+
+
+}
+
+Directory::~Directory() {
+    clear();
+}
+
+Directory::Directory(const Directory &other): BaseFile(other.getName()){ copy(other); }
+
+Directory& Directory::operator=(const Directory &other) {
+    if(this != &other){
+        clear();
+        copy(other);
+    }
+}
+
+Directory::Directory(Directory &&other):
+        BaseFile(other.getName()), parent(other.parent), children(move(other.children)) {
+    other.parent = nullptr;
+}
+
+Directory& Directory::operator=(Directory &&other) {
+    if(this != &other){
+        clear();
+        setName(other.getName());
+        parent = other.parent;
+        children = move(move(other.children));
+        other.parent = nullptr;
+    }
 }

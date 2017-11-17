@@ -16,6 +16,9 @@ public:
 	void setName(string newName);
 	virtual int getSize() = 0;
 	virtual bool isFile() = 0;
+
+    // destructor
+    virtual ~BaseFile() = 0;
 };
 
 class File : public BaseFile {
@@ -26,12 +29,18 @@ public:
 	File(string name, int size); // Constructor
 	int getSize(); // Return the size of the file
 	bool isFile();
+    ~File();
 };
 
 class Directory : public BaseFile {
 private:
 	vector<BaseFile*> children;
 	Directory *parent;
+
+    //rule of five:
+    void clear();
+    void copy(const Directory &other);
+
 
 public:
 	Directory(string name, Directory *parent); // Constructor
@@ -47,8 +56,22 @@ public:
 	int getSize(); // Return the size of the directory (recursively)
 	string getAbsolutePath();  //Return the path from the root to this
 
+
+    //rule of five:
+    // destructor
+    ~Directory();
+    // copy
+    Directory(const Directory &other);
+    // move
+    Directory(Directory &&other);
+    // copy assignment
+    Directory &operator= (const Directory &other);
+    // move assignment
+    Directory &operator= (Directory &&other);
+
+
 	bool isFile();
-	Directory *findChild(string childName);
+	BaseFile *findChild(string childName);
 };
 
 #endif
