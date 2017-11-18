@@ -1,5 +1,8 @@
 #include "Commands.h"
+#include "GlobalVariables.h"
 #include <algorithm>
+#include <iostream>
+using namespace std;
 
 BaseFile::BaseFile(string name): name(name) {}
 
@@ -11,7 +14,11 @@ void BaseFile::setName(string newName){
     name = newName;
 }
 
-BaseFile::~BaseFile() {};
+BaseFile::~BaseFile() {
+    if(verbose == 1 || verbose == 3){
+        cout << "BaseFile::~BaseFile()" << endl;
+    }
+}
 
 File::File(string name, int size): BaseFile(name), size(size) {}
 
@@ -21,9 +28,13 @@ int File::getSize(){
 
 bool File::isFile() { return true; }
 
-File::~File() {}
+File::~File() {
+    if(verbose == 1 || verbose == 3){
+        cout << "File::~File()" << endl;
+    }
+}
 
-Directory::Directory(string name, Directory *parent): BaseFile(name), parent(parent), children(){}
+Directory::Directory(string name, Directory *parent): BaseFile(name), children(), parent(parent) {}
 
 Directory *Directory::getParent() const{
     return parent;
@@ -34,24 +45,34 @@ void Directory::setParent(Directory *newParent){
     parent = newParent;
     parent -> addFile(this);
 }
-
+// TODO: add this thing here
 void Directory::addFile(BaseFile* file){
-    children.push_back(file);
+    if(!findChild(file->getName())) {
+        children.push_back(file);
+    }
 }
 
+//TODO: iterator fix like before
 void Directory::removeFile(string name){
-    for(vector<BaseFile*>::iterator it = children.begin(); it != children.end(); ++it){
+    vector<BaseFile*>::iterator it = children.begin();
+    while(it != children.end()){
         if((*it) -> getName() == name){
             children.erase(it);
+            it = children.end();
+        } else {
+            ++it;
         }
     }
 }
 
 //TODO: why like this
 void Directory::removeFile(BaseFile* file){
-    for(vector<BaseFile*>::iterator it = children.begin(); *it != nullptr && it != children.end(); ++it){
+    vector<BaseFile*>::iterator it = children.begin();
+    while(it != children.end()){
         if(*it == file){
             children.erase(it);
+        } else {
+            ++it;
         }
     }
 }
@@ -121,18 +142,21 @@ BaseFile* Directory::findChild(string childName) {
 }
 
 void Directory::clear(){
-    // clear children
-    for(vector<BaseFile*>::iterator it = children.begin(); it != children.end(); ++it){
+    vector<BaseFile*>::iterator it = children.begin();
+    while(it != children.end()){
+        if(!(*it) ->isFile()){
+            ((Directory *)(*it)) -> parent = nullptr;
+        }
         delete (*it);
+        it = children.erase(it);
     }
     // remove from parent
-    if(this->parent != nullptr){
-        parent->removeFile(this);
+    if(this -> parent != nullptr){
+        parent -> removeFile(this);
     }
 }
 
 void Directory::copy(const Directory &other) {
-    setName(other.getName());
     parent = other.parent;
     // copy children
     for(vector<BaseFile*>::const_iterator it = other.children.begin(); it != other.children.end(); ++it){
@@ -140,7 +164,7 @@ void Directory::copy(const Directory &other) {
             children.push_back(new File(((File*)(*it)) -> getName(), ((File*)(*it)) -> getSize()));
         } else {
             children.push_back(new Directory(*((Directory *)(*it))));
-            ((Directory *)children.back()) -> setParent(this);
+            ((Directory *)children.back())->parent = this;
         }
     }
 
@@ -148,21 +172,36 @@ void Directory::copy(const Directory &other) {
 }
 
 Directory::~Directory() {
+    if(verbose == 1 || verbose == 3){
+        cout << getName() << "Directory::~Directory()" << endl;
+    }
     clear();
 }
 
-Directory::Directory(const Directory &other): BaseFile(other.getName()){ copy(other); }
+Directory::Directory(const Directory &other): BaseFile(other.getName()), children(),  parent(){
+    copy(other);
+    if(verbose == 1 || verbose == 3){
+        cout << "Directory::Directory(const Directory &other): BaseFile(other.getName())" << endl;
+    }
+}
 
 Directory& Directory::operator=(const Directory &other) {
     if(this != &other){
         clear();
         copy(other);
     }
+    if(verbose == 1 || verbose == 3){
+        cout << "Directory& Directory::operator=(const Directory &other)" << endl;
+    }
+    return *this;
 }
 
 Directory::Directory(Directory &&other):
-        BaseFile(other.getName()), parent(other.parent), children(move(other.children)) {
+        BaseFile(other.getName()), children(move(other.children)), parent(other.parent) {
     other.parent = nullptr;
+    if(verbose == 1 || verbose == 3){
+        cout << "Directory::Directory(Directory &&other)" << endl;
+    }
 }
 
 Directory& Directory::operator=(Directory &&other) {
@@ -173,4 +212,8 @@ Directory& Directory::operator=(Directory &&other) {
         children = move(move(other.children));
         other.parent = nullptr;
     }
+    if(verbose == 1 || verbose == 3){
+        cout << "Directory& Directory::operator=(Directory &&other)" << endl;
+    }
+    return *this;
 }

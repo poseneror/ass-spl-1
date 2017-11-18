@@ -1,5 +1,5 @@
 #include "Commands.h"
-
+#include "GlobalVariables.h"
 #include <sstream>
 #include <iostream>
 
@@ -9,6 +9,8 @@ BaseCommand::BaseCommand(string args): args(args){}
 string BaseCommand::getArgs() {
     return args;
 }
+
+BaseCommand::~BaseCommand() {}
 
 string TrimArgs(string args, int length){
     string trimmed = args.substr(length);
@@ -29,7 +31,7 @@ string PwdCommand::toString() {
     return "pwd";
 }
 
-// the function finds the directory specified and returns false if it dosn't exist
+// the function finds the directory or file specified and returns false if it dosn't exist
 BaseFile *findFile(FileSystem &fs, string path){
     BaseFile *targetFile;
     // deter if should use relative or absolute path
@@ -129,6 +131,8 @@ void LsCommand::execute(FileSystem &fs) {
     if(targetDir && !targetDir->isFile()) {
         if(sort){
             ((Directory *)targetDir)->sortBySizeName();
+        } else {
+            ((Directory *)targetDir)->sortByName();
         }
         vector<BaseFile *> children = ((Directory*)targetDir) -> getChildren();
         for (vector<BaseFile *>::iterator it = children.begin(); it != children.end(); ++it) {
@@ -136,7 +140,7 @@ void LsCommand::execute(FileSystem &fs) {
                 cout << "FILE" << "\t";
             } else {
                 //TODO: check
-                cout << "DIR " << "\t";
+                cout << "DIR" << "\t";
             }
             cout << (*it)->getName() << "\t" << (*it)->getSize() << endl;
         }
@@ -165,7 +169,8 @@ void MkdirCommand::execute(FileSystem &fs) {
     while (std::getline(ss, dir, '/')) {
         dirs.insert(dirs.begin(), dir);
     }
-    while (!dirs.empty()) {
+    bool flag = true;
+    while (!dirs.empty() && flag) {
         string currentName = dirs.back();
         dirs.pop_back();
         if(currentName != "") {
@@ -174,12 +179,16 @@ void MkdirCommand::execute(FileSystem &fs) {
                     targetDir = targetDir -> getParent();
                 }
             } else {
-                BaseFile *foundChild = targetDir-> findChild(currentName);
-                if (foundChild && !(foundChild->isFile())) {
-                    if(dirs.empty()){
-                        cout << "The directory already exists" << endl;
+                BaseFile *foundChild = targetDir -> findChild(currentName);
+                if (foundChild){
+                    if(!(foundChild->isFile())) {
+                        if (dirs.empty()) {
+                            flag = false;
+                        } else {
+                            targetDir = (Directory *) foundChild;
+                        }
                     } else {
-                        targetDir = (Directory*) foundChild;
+                        flag = false;
                     }
                 } else {
                     targetDir -> addFile(new Directory(currentName, targetDir));
@@ -187,6 +196,9 @@ void MkdirCommand::execute(FileSystem &fs) {
                 }
             }
         }
+    }
+    if(!flag){
+        cout << "The directory already exists" << endl;
     }
 }
 string MkdirCommand::toString() {
@@ -265,7 +277,17 @@ string MkfileCommand::toString() {
 
 CpCommand::CpCommand(string args): BaseCommand(args) {}
 
-//TODO: cp dir1 dir1
+// check if dir is present in the working directory predessesors
+bool isPre(FileSystem &fs, Directory * dir, Directory * current){
+    while(current != nullptr){
+        if(current == dir){
+            return true;
+        } else {
+            current = current -> getParent();
+        }
+    }
+    return false;
+}
 void CpCommand::execute(FileSystem &fs) {
     string command = TrimArgs(getArgs(), 2);
 
@@ -290,16 +312,18 @@ void CpCommand::execute(FileSystem &fs) {
 
     BaseFile* srcFile = findFile(fs, src);
     Directory* desDir = dynamic_cast<Directory*>(findFile(fs, des));
-    if(desDir && srcFile){
-        if(desDir->findChild(srcFile->getName()))
-        {
-            cout << "can't copy file / directory" << endl;
-        } else {
+    if(desDir && srcFile ){
+        //TODO: REMOVE MESSAGE
+        if(!desDir->findChild(srcFile->getName())) {
             if (srcFile->isFile()) {
-                desDir->addFile(new File(*((File *) srcFile)));
+                desDir -> addFile(new File(*((File *) srcFile)));
             } else {
-                Directory *copy = new Directory(*(Directory *) srcFile);
-                copy->setParent(desDir);
+                if (isPre(fs, (Directory *) srcFile, desDir)) {
+                    cout << "Can't copy directory" << endl;
+                } else {
+                    Directory *copy = new Directory(*(Directory *) srcFile);
+                    copy->setParent(desDir);
+                }
             }
         }
     } else {
@@ -310,19 +334,8 @@ string CpCommand::toString() {
     return "cp";
 }
 
-// check if dir is present in the working directory predessesors
-bool isPre(FileSystem &fs, Directory * dir){
-    Directory * current = &fs.getWorkingDirectory();
-    while(current != nullptr){
-        if(current == dir){
-            return true;
-        } else {
-            current = current -> getParent();
-        }
-    }
-}
 
-//TODO: check if file exists at des
+//TODO: use move constructor?
 MvCommand::MvCommand(string args): BaseCommand(args) {}
 void MvCommand::execute(FileSystem &fs) {
     string command = TrimArgs(getArgs(), 2);
@@ -349,9 +362,8 @@ void MvCommand::execute(FileSystem &fs) {
     BaseFile* srcFile = findFile(fs, src);
     Directory* desDir = dynamic_cast<Directory*>(findFile(fs, des));
     if(desDir && srcFile){
-        if(desDir->findChild(srcFile->getName())){
-            cout << "can't move file / directory" << endl;
-        } else {
+        //TODO: REMOVE MESSAGE
+        if(!desDir->findChild(srcFile->getName())){
             if (srcFile->isFile()) {
                 Directory *parent;
                 size_t s = src.find_last_of('/');
@@ -360,10 +372,11 @@ void MvCommand::execute(FileSystem &fs) {
                 } else {
                     parent = (Directory *) findFile(fs, src.substr(0, s));
                 }
+                // HERE
                 parent->removeFile((File *) srcFile);
                 desDir->addFile(srcFile);
             } else {
-                if (isPre(fs, (Directory *) srcFile)) {
+                if (isPre(fs, (Directory *) srcFile, desDir)) {
                     cout << "Can't move directory" << endl;
                 } else {
                     ((Directory *) srcFile) -> setParent(desDir);
@@ -390,7 +403,6 @@ void RenameCommand::execute(FileSystem &fs) {
         sections.insert(sections.begin(), sec);
     }
     string target = "";
-
     string newName = "";
 
     if(!sections.empty()){
@@ -407,7 +419,21 @@ void RenameCommand::execute(FileSystem &fs) {
         if(!targetFile->isFile() && (Directory *) targetFile == &fs.getWorkingDirectory()){
             cout << "Can't rename working directory" << endl;
         } else {
-            targetFile->setName(newName);
+            //TODO: file name already exist check - print nothing but don't change the name
+            Directory *parent;
+            if (targetFile->isFile()) {
+                size_t s = target.find_last_of('/');
+                if (s == string::npos) {
+                    parent = &fs.getRootDirectory();
+                } else {
+                    parent = (Directory *) findFile(fs, target.substr(0, s));
+                }
+            } else {
+                parent = ((Directory *) targetFile) -> getParent();
+            }
+            if(!parent->findChild(newName)) {
+                targetFile->setName(newName);
+            }
         }
     } else {
         cout << "No such file or directory" << endl;
@@ -424,8 +450,8 @@ void RmCommand::execute(FileSystem &fs) {
     string target = TrimArgs(getArgs(), 2);
     BaseFile *targetFile = findFile(fs, target);
     if(targetFile){
-        if(!targetFile->isFile() && isPre(fs, (Directory *)targetFile)){
-            cout << "Can't remove directory" << endl;
+        if(!targetFile->isFile() && isPre(fs, (Directory *)targetFile, &fs.getWorkingDirectory())){
+            cout << "Can’t remove directory" << endl;
         } else {
             if (targetFile->isFile()) {
                 Directory *parent;
@@ -446,4 +472,59 @@ void RmCommand::execute(FileSystem &fs) {
 
 string RmCommand::toString() {
     return "rm";
+}
+
+HistoryCommand::HistoryCommand(string args, const vector<BaseCommand *> &history): BaseCommand(args), history(history) {}
+
+void HistoryCommand::execute(FileSystem &fs) {
+    int i = 0;
+    for(vector<BaseCommand*>::const_iterator it = history.begin(); it != history.end(); ++it, i++){
+        cout << i << "\t" << (*it) -> getArgs() << endl;
+    }
+}
+
+string HistoryCommand::toString() {
+    return "history";
+}
+
+VerboseCommand::VerboseCommand(string args): BaseCommand(args) {}
+
+void VerboseCommand::execute(FileSystem &fs) {
+    string val = TrimArgs(getArgs(), 7);
+    int v = stoi(val);
+    if(v <= 3 && v >= 0){
+        verbose = v;
+    } else {
+        cout << "Wrong verbose input" << endl;
+    }
+}
+
+string VerboseCommand::toString() {
+    return "vebose";
+}
+
+ExecCommand::ExecCommand(string args, const vector<BaseCommand *> &history): BaseCommand(args), history(history) {}
+
+void ExecCommand::execute(FileSystem &fs) {
+    string val = TrimArgs(getArgs(), 4);
+    size_t v = stoi(val);
+    if(v >= 0 && v < history.size()){
+        history.at(v)->execute(fs);
+    } else {
+        cout << "Command not found" << endl;
+    }
+}
+
+string ExecCommand::toString() {
+    return "exec";
+}
+
+ErrorCommand::ErrorCommand(string args): BaseCommand(args) {}
+void ErrorCommand::execute(FileSystem &fs) {
+    string cType = getArgs().substr(0, getArgs().find(" "));
+    cout << cType << ": Unknown command" << endl;
+}
+
+string ErrorCommand::toString() {
+    return "error";
 }

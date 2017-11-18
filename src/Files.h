@@ -29,6 +29,7 @@ public:
 	File(string name, int size); // Constructor
 	int getSize(); // Return the size of the file
 	bool isFile();
+
     ~File();
 };
 
@@ -40,7 +41,6 @@ private:
     //rule of five:
     void clear();
     void copy(const Directory &other);
-
 
 public:
 	Directory(string name, Directory *parent); // Constructor

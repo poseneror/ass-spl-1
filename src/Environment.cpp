@@ -1,64 +1,96 @@
 #include "Environment.h"
+#include "GlobalVariables.h"
 
 Environment::Environment(): commandsHistory(), fs() {
 
-    // root files
-    Directory *d1 = new Directory("dir1", &fs.getRootDirectory());
-    Directory *d2 = new Directory("dir2", &fs.getRootDirectory());
-    Directory *d3 = new Directory("dir3", &fs.getRootDirectory());
-    Directory *d4 = new Directory("dir4", &fs.getRootDirectory());
-    Directory *d5 = new Directory("dir5", d1);
-    Directory *d6 = new Directory("dir6", d1);
-
-    fs.getRootDirectory().addFile(d1);
-    fs.getRootDirectory().addFile(d2);
-    fs.getRootDirectory().addFile(d3);
-    fs.getRootDirectory().addFile(d4);
-    d1->addFile(d5);
-    d1->addFile(d6);
-    d1->addFile(new File("file4", 12));
-    d1->addFile(new File("file3", 12));
+//    // root files
+//    Directory *d1 = new Directory("dir1", &fs.getRootDirectory());
+//    Directory *d2 = new Directory("dir2", &fs.getRootDirectory());
+//    Directory *d3 = new Directory("dir3", &fs.getRootDirectory());
+//    Directory *d4 = new Directory("dir4", &fs.getRootDirectory());
+//    Directory *d5 = new Directory("dir5", d1);
+//    Directory *d6 = new Directory("dir6", d1);
+//
+//    fs.getRootDirectory().addFile(d1);
+//    fs.getRootDirectory().addFile(d2);
+//    fs.getRootDirectory().addFile(d3);
+//    fs.getRootDirectory().addFile(d4);
+//    d1->addFile(d5);
+//    d1->addFile(d6);
+//    d1->addFile(new File("file4", 12));
+//    d1->addFile(new File("file3", 12));
+////    fs = *new FileSystem(fs);
 
 
 }
 void Environment::start() {
-    string command = "";
+    string command;
     while(command != "exit"){
-        if(command != ""){
-            string cType = command.substr(0, command.find(" "));
-            if(cType == "pwd") {
-                PwdCommand(command).execute(fs);
-            } else if(cType == "cd") {
-                CdCommand(command).execute(fs);
-            } else if(cType == "ls") {
-                LsCommand(command).execute(fs);
-            } else if(cType == "mkdir"){
-                MkdirCommand(command).execute(fs);
-            } else if(cType == "mkfile"){
-                MkfileCommand(command).execute(fs);
-            } else if(cType == "cp"){
-                CpCommand(command).execute(fs);
-            } else if(cType == "mv"){
-                MvCommand(command).execute(fs);
-            } else if(cType == "rename"){
-                RenameCommand(command).execute(fs);
-            } else if(cType == "rm") {
-                RmCommand(command).execute(fs);
+        if(!command.empty()){
+            if(verbose == 2 || verbose == 3){
+                cout << command << endl;
             }
-//            } else if(cType == "history"){
-//                HistoryCommand(command).execute(fs);
-//            } else if(cType == "verbose"){
-//                VerboseCommand(command).execute(fs);
-//            } else if(cType == "exec"){
-//                ExecCommand(command).execute(fs);
-//            }
+            string cType = command.substr(0, command.find(' '));
+            if(cType == "pwd") {
+                PwdCommand *cmd = new PwdCommand(command);
+                cmd -> execute(fs);
+                addToHistory(cmd);
+            } else if(cType == "cd") {
+                CdCommand *cmd = new CdCommand(command);
+                cmd -> execute(fs);
+                addToHistory(cmd);
+            } else if(cType == "ls") {
+                LsCommand *cmd = new LsCommand(command);
+                cmd -> execute(fs);
+                addToHistory(cmd);
+            } else if(cType == "mkdir"){
+                MkdirCommand *cmd = new MkdirCommand(command);
+                cmd -> execute(fs);
+                addToHistory(cmd);
+            } else if(cType == "mkfile"){
+                MkfileCommand *cmd = new MkfileCommand(command);
+                cmd -> execute(fs);
+                addToHistory(cmd);
+            } else if(cType == "cp"){
+                CpCommand *cmd = new CpCommand(command);
+                cmd -> execute(fs);
+                addToHistory(cmd);
+            } else if(cType == "mv"){
+                MvCommand *cmd = new MvCommand(command);
+                cmd -> execute(fs);
+                addToHistory(cmd);
+            } else if(cType == "rename"){
+                RenameCommand *cmd = new RenameCommand(command);
+                cmd -> execute(fs);
+                addToHistory(cmd);
+            } else if(cType == "rm"){
+                RmCommand *cmd = new RmCommand(command);
+                cmd -> execute(fs);
+                addToHistory(cmd);
+            } else if(cType == "history") {
+                HistoryCommand *cmd = new HistoryCommand(command, getHistory());
+                cmd -> execute(fs);
+                addToHistory(cmd);
+            } else if(cType == "verbose") {
+                VerboseCommand *cmd = new VerboseCommand(command);
+                cmd -> execute(fs);
+                addToHistory(cmd);
+            } else if(cType == "exec") { //TODO: infinite loop
+                ExecCommand *cmd = new ExecCommand(command, getHistory());
+                cmd->execute(fs);
+                addToHistory(cmd);
+            } else {
+                ErrorCommand *cmd = new ErrorCommand(command);
+                cmd -> execute(fs);
+                addToHistory(cmd);
+            }
         }
         cout << fs.getWorkingDirectory().getAbsolutePath() << ">";
         getline(cin, command);
     }
 }
 
-FileSystem& Environment::getFileSystem() {
+const FileSystem& Environment::getFileSystem() const {
     return fs;
 }
 
@@ -68,4 +100,47 @@ void Environment::addToHistory(BaseCommand *command) {
 
 const vector<BaseCommand *> & Environment::getHistory() const {
     return commandsHistory;
+}
+
+void Environment::clear() {
+    vector<BaseCommand*>::iterator it = commandsHistory.begin();
+    for(vector<BaseCommand*>::iterator it = commandsHistory.begin(); it != commandsHistory.end();++it){
+        delete (*it);
+    }
+}
+void Environment::copy(const Environment &other) {
+    for(vector<BaseCommand*>::const_iterator it = other.commandsHistory.begin();
+        it != other.commandsHistory.end(); ++it){
+        commandsHistory.push_back((*it));
+    }
+    fs = *new FileSystem(other.getFileSystem());
+}
+
+Environment::~Environment() { clear(); }
+
+Environment::Environment(const Environment &other): commandsHistory(), fs() { copy(other); }
+
+//TODO: ????
+Environment::Environment(Environment &&other): commandsHistory(), fs() {
+    commandsHistory = other.commandsHistory;
+    fs = other.getFileSystem();
+    other.commandsHistory.clear();
+}
+
+Environment& Environment::operator=(const Environment &other) {
+    if(this != &other){
+        clear();
+        copy(other);
+    }
+    return *this;
+}
+
+Environment& Environment::operator=(Environment &&other) {
+    if(this != &other){
+        clear();
+        commandsHistory = other.commandsHistory;
+        fs = other.getFileSystem();
+        other.commandsHistory.clear();
+    }
+    return *this;
 }

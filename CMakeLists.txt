@@ -9,7 +9,7 @@ set(SOURCE_FILES src/Main.cpp
         src/Commands.cpp
         src/Environment.cpp
         src/Files.cpp
-        src/FileSystem.cpp)
+        src/FileSystem.cpp
 
 
-add_executable(ass-spl-1 ${SOURCE_FILES})
+add_executable(ass-spl-1 ${SOURCE_FILES}))

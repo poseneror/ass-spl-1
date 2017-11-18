@@ -17,6 +17,7 @@ public:
 	string getArgs();
 	virtual void execute(FileSystem & fs) = 0;
 	virtual string toString() = 0;
+	virtual ~BaseCommand();
 };
 
 class PwdCommand : public BaseCommand {
