@@ -65,7 +65,6 @@ void Directory::removeFile(string name){
     }
 }
 
-//TODO: why like this
 void Directory::removeFile(BaseFile* file){
     vector<BaseFile*>::iterator it = children.begin();
     while(it != children.end()){

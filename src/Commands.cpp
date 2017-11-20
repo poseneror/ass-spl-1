@@ -12,6 +12,16 @@ string BaseCommand::getArgs() {
 
 BaseCommand::~BaseCommand() {}
 
+vector <string> Split(string src, char c){
+    istringstream ss(src);
+    vector <string> sections;
+    string sec;
+    while (std::getline(ss, sec, c)) {
+        sections.insert(sections.begin(), sec);
+    }
+    return sections;
+}
+
 string TrimArgs(string args, int length){
     string trimmed = args.substr(length);
     if(trimmed.length() != 0 && trimmed.at(0) == ' '){
@@ -41,12 +51,7 @@ BaseFile *findFile(FileSystem &fs, string path){
         targetFile = &fs.getWorkingDirectory();
     }
     // insert a queue of files (dirs / files) into the vector, using a string stream
-    istringstream ss(path);
-    vector <string> dirs;
-    string dir;
-    while (std::getline(ss, dir, '/')) {
-        dirs.insert(dirs.begin(), dir);
-    }
+    vector<string> dirs = Split(path, '/');
     // pop the dirs from the vector and change the path
     bool flag = true;
     while (!dirs.empty() && flag) {
@@ -105,12 +110,7 @@ LsCommand::LsCommand(string args): BaseCommand(args){};
 void LsCommand::execute(FileSystem &fs) {
     string command = TrimArgs(getArgs(), 2);
     // insert a queue of dirs into the vector, using a string stream
-    istringstream ss(command);
-    vector <string> sections;
-    string sec;
-    while (std::getline(ss, sec, ' ')) {
-        sections.insert(sections.begin(), sec);
-    }
+    vector <string> sections = Split(command, ' ');
     bool sort = false;
     string path = "";
     if(!sections.empty()) {
@@ -163,12 +163,7 @@ void MkdirCommand::execute(FileSystem &fs) {
     } else {
         targetDir = &fs.getWorkingDirectory();
     }
-    istringstream ss(path);
-    vector <string> dirs;
-    string dir;
-    while (std::getline(ss, dir, '/')) {
-        dirs.insert(dirs.begin(), dir);
-    }
+    vector <string> dirs = Split(path, '/');
     bool flag = true;
     while (!dirs.empty() && flag) {
         string currentName = dirs.back();
@@ -208,16 +203,9 @@ string MkdirCommand::toString() {
 MkfileCommand::MkfileCommand(string args): BaseCommand(args) {}
 void MkfileCommand::execute(FileSystem &fs) {
     string command = TrimArgs(getArgs(), 6);
-    istringstream ss(command);
-    vector <string> sections;
-    string sec;
-    while (std::getline(ss, sec, ' ')) {
-        sections.insert(sections.begin(), sec);
-    }
-
+    vector <string> sections = Split(command, ' ');
     string path = "";
     int size = 0;
-
     if(!sections.empty()){
         path = sections.back();
         sections.pop_back();
@@ -231,12 +219,7 @@ void MkfileCommand::execute(FileSystem &fs) {
     } else {
         targetDir = &fs.getWorkingDirectory();
     }
-    istringstream ss2(path);
-    vector <string> files;
-    string file;
-    while (std::getline(ss2, file, '/')) {
-        files.insert(files.begin(), file);
-    }
+    vector <string> files = Split(path, '/');
     bool flag = true;
     while (!files.empty() && flag) {
         string currentName = files.back();
@@ -290,26 +273,16 @@ bool isPre(FileSystem &fs, Directory * dir, Directory * current){
 }
 void CpCommand::execute(FileSystem &fs) {
     string command = TrimArgs(getArgs(), 2);
-
-    istringstream ss(command);
-    vector <string> sections;
-    string sec;
-    while (std::getline(ss, sec, ' ')) {
-        sections.insert(sections.begin(), sec);
-    }
-
+    vector <string> sections = Split(command, ' ');
     string src = "";
     string des = "";
-
     if(!sections.empty()){
         src = sections.back();
         sections.pop_back();
     }
-
     if(!sections.empty()){
         des = sections.back();
     }
-
     BaseFile* srcFile = findFile(fs, src);
     Directory* desDir = dynamic_cast<Directory*>(findFile(fs, des));
     if(desDir && srcFile ){
@@ -339,26 +312,16 @@ string CpCommand::toString() {
 MvCommand::MvCommand(string args): BaseCommand(args) {}
 void MvCommand::execute(FileSystem &fs) {
     string command = TrimArgs(getArgs(), 2);
-
-    istringstream ss(command);
-    vector <string> sections;
-    string sec;
-    while (std::getline(ss, sec, ' ')) {
-        sections.insert(sections.begin(), sec);
-    }
-
+    vector <string> sections = Split(command, ' ');
     string src = "";
     string des = "";
-
     if(!sections.empty()){
         src = sections.back();
         sections.pop_back();
     }
-
     if(!sections.empty()){
         des = sections.back();
     }
-
     BaseFile* srcFile = findFile(fs, src);
     Directory* desDir = dynamic_cast<Directory*>(findFile(fs, des));
     if(desDir && srcFile){
@@ -395,25 +358,16 @@ RenameCommand::RenameCommand(string args): BaseCommand(args) {}
 
 void RenameCommand::execute(FileSystem &fs) {
     string command = TrimArgs(getArgs(), 6);
-
-    istringstream ss(command);
-    vector <string> sections;
-    string sec;
-    while (std::getline(ss, sec, ' ')) {
-        sections.insert(sections.begin(), sec);
-    }
+    vector <string> sections = Split(command, ' ');
     string target = "";
     string newName = "";
-
     if(!sections.empty()){
         target = sections.back();
         sections.pop_back();
     }
-
     if(!sections.empty()){
         newName = sections.back();
     }
-
     BaseFile* targetFile = findFile(fs, target);
     if(targetFile){
         if(!targetFile->isFile() && (Directory *) targetFile == &fs.getWorkingDirectory()){
