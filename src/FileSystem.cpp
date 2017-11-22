@@ -1,4 +1,4 @@
-#include "FileSystem.h"
+#include "../include/FileSystem.h"
 
 FileSystem::FileSystem(): rootDirectory(new Directory("", nullptr)), workingDirectory(rootDirectory) {}
 
@@ -24,6 +24,7 @@ void FileSystem::copy(const FileSystem &other) {
     vector<string> prev;
     while(current->getParent() != nullptr){
         prev.push_back(current->getName());
+        current = current -> getParent();
     }
     workingDirectory = rootDirectory;
     while(!prev.empty()){

@@ -1,5 +1,5 @@
-#include "Environment.h"
-#include "GlobalVariables.h"
+#include "../include/Environment.h"
+#include "../include/GlobalVariables.h"
 
 Environment::Environment(): commandsHistory(), fs() {}
 void Environment::start() {

@@ -1,5 +1,5 @@
-#include "Commands.h"
-#include "GlobalVariables.h"
+#include "../include/Commands.h"
+#include "../include/GlobalVariables.h"
 #include <sstream>
 #include <iostream>
 
@@ -61,6 +61,8 @@ BaseFile *findFile(FileSystem &fs, string path){
             if(currentName == ".."){
                 if(((Directory *) targetFile) -> getParent() != nullptr) {
                     targetFile = ((Directory *) targetFile) -> getParent();
+                } else {
+                    flag = false;
                 }
             } else {
                 BaseFile *foundChild = ((Directory *) targetFile)->findChild(currentName);
@@ -405,7 +407,7 @@ void RmCommand::execute(FileSystem &fs) {
     BaseFile *targetFile = findFile(fs, target);
     if(targetFile){
         if(!targetFile->isFile() && isPre(fs, (Directory *)targetFile, &fs.getWorkingDirectory())){
-            cout << "Can’t remove directory" << endl;
+            cout << "Can't remove directory" << endl;
         } else {
             if (targetFile->isFile()) {
                 Directory *parent;

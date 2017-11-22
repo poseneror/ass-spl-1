@@ -1,13 +1,12 @@
 # All Targets
-all: Main
+all: fs
 
 # Tool invocations
-# Executable "Main" depends on the files Main.o and ...
-Main: bin/Main.o bin/Files.o bin/FileSystem.o bin/Commands.o bin/Environment.o
-	@echo 'Building target: Main'
+fs: bin/Main.o bin/Files.o bin/FileSystem.o bin/Commands.o bin/Environment.o
+	@echo 'Building target: fs'
 	@echo 'Invoking: C++ Linker'
-	g++ -o bin/Main bin/Main.o bin/Files.o bin/FileSystem.o bin/Commands.o bin/Environment.o
-	@echo 'Finished building target: Main'
+	g++ -o bin/fs bin/Main.o bin/Files.o bin/FileSystem.o bin/Commands.o bin/Environment.o
+	@echo 'Finished building target: fs'
 	@echo ' '
 
 # Depends on the source and header files

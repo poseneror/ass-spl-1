@@ -51,9 +51,7 @@ FILE	rf2	100
 DIR	d1	3030
 />ls d1/d11
 />ls -s ../../d2
-DIR	d22	0
-DIR	d23	0
-DIR	d21	3
+The system cannot find the path specified
 />ls /d2/d21/d31
 The system cannot find the path specified
 />******************************* mkdir *******************************

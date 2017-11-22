@@ -1,5 +1,5 @@
-#include "Commands.h"
-#include "GlobalVariables.h"
+#include "../include/Commands.h"
+#include "../include/GlobalVariables.h"
 #include <algorithm>
 #include <iostream>
 using namespace std;

@@ -103,7 +103,7 @@ No such file or directory
 />rm z
 No such file or directory
 />rm /
-Can’t remove directory
+Can't remove directory
 />exec 1000000
 Command not found
 />

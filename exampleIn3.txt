@@ -1,0 +1,113 @@
+verbose 2
+history
+history
+history
+******************************* 0 *******************************
+mkfile rf1 100
+mkfile rf2 100
+mkfile rf3 50
+mkdir d1
+mkdir d2
+mkdir d3
+ls
+cd d1
+mkfile d1f1 1000
+mkfile d1f2 2000
+mkfile d1f3 30
+mkdir d11
+mkdir d12
+ls
+cd ../d2
+mkdir d21
+mkdir d22
+mkdir d23
+ls
+cd d21
+mkfile d21f1 1
+mkfile d21f2 2
+ls
+******************************* cp file *******************************
+cp d21f1 ..
+cp d21f1 ..
+ls
+cd ..
+ls
+cp ../rf1 d21
+ls
+cd d21
+ls
+cd ../..
+ls
+******************************* cp directory *******************************
+cp d2/d21 d2/d22
+ls
+ls d2
+ls d2/d22
+******************************* mv file *******************************
+cd d2
+mv ../rf3 d23
+ls ..
+ls d23
+mv f999 d23
+ls d23
+mv ../d2/d21f1 ../../../..
+ls
+ls /
+******************************* mv directory *******************************
+cd /
+mv d2 d1
+ls
+ls d1
+ls d2
+mv d1/d2 /
+ls
+mv d999 d1
+ls
+ls d1
+mv d1 d999
+ls
+ls d1
+mkdir d3/d31
+cd d3/d31
+ls
+mv .. /
+ls
+ls /
+mv /d3 /d1
+ls
+ls /d1
+ls /
+******************************* rename file *******************************
+cd /
+rename rf1 rf3
+rename rf3 rf2
+rename f999 rf4
+ls
+******************************* rename directory *******************************
+rename d1 d4
+ls
+rename /d4 d2
+ls
+rename d9999 d8888
+ls
+cd d3/d31
+rename ../d31 d3333
+******************************* rm file *******************************
+cd /
+rm rf2
+ls
+rm f9999
+ls
+******************************* rm directory *******************************
+rm d2
+ls
+rm d3
+rm rf3
+ls
+cd d4
+rm /d4
+******************************* history and exec *******************************
+history
+exec 95
+exec 102
+exit

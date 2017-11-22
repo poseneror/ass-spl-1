@@ -1,0 +1,394 @@
+/>/>history
+0	verbose 2
+/>history
+0	verbose 2
+1	history
+/>history
+0	verbose 2
+1	history
+2	history
+/>******************************* 0 *******************************
+*******************************: Unknown command
+/>mkfile rf1 100
+/>mkfile rf2 100
+/>mkfile rf3 50
+/>mkdir d1
+/>mkdir d2
+/>mkdir d3
+/>ls
+DIR	d1	0
+DIR	d2	0
+DIR	d3	0
+FILE	rf1	100
+FILE	rf2	100
+FILE	rf3	50
+/>cd d1
+/d1>mkfile d1f1 1000
+/d1>mkfile d1f2 2000
+/d1>mkfile d1f3 30
+/d1>mkdir d11
+/d1>mkdir d12
+/d1>ls
+DIR	d11	0
+DIR	d12	0
+FILE	d1f1	1000
+FILE	d1f2	2000
+FILE	d1f3	30
+/d1>cd ../d2
+/d2>mkdir d21
+/d2>mkdir d22
+/d2>mkdir d23
+/d2>ls
+DIR	d21	0
+DIR	d22	0
+DIR	d23	0
+/d2>cd d21
+/d2/d21>mkfile d21f1 1
+/d2/d21>mkfile d21f2 2
+/d2/d21>ls
+FILE	d21f1	1
+FILE	d21f2	2
+/d2/d21>******************************* cp file *******************************
+*******************************: Unknown command
+/d2/d21>cp d21f1 ..
+/d2/d21>cp d21f1 ..
+/d2/d21>ls
+FILE	d21f1	1
+FILE	d21f2	2
+/d2/d21>cd ..
+/d2>ls
+DIR	d21	3
+FILE	d21f1	1
+DIR	d22	0
+DIR	d23	0
+/d2>cp ../rf1 d21
+/d2>ls
+DIR	d21	103
+FILE	d21f1	1
+DIR	d22	0
+DIR	d23	0
+/d2>cd d21
+/d2/d21>ls
+FILE	d21f1	1
+FILE	d21f2	2
+FILE	rf1	100
+/d2/d21>cd ../..
+/>ls
+DIR	d1	3030
+DIR	d2	104
+DIR	d3	0
+FILE	rf1	100
+FILE	rf2	100
+FILE	rf3	50
+/>******************************* cp directory *******************************
+*******************************: Unknown command
+/>cp d2/d21 d2/d22
+/>ls
+DIR	d1	3030
+DIR	d2	207
+DIR	d3	0
+FILE	rf1	100
+FILE	rf2	100
+FILE	rf3	50
+/>ls d2
+DIR	d21	103
+FILE	d21f1	1
+DIR	d22	103
+DIR	d23	0
+/>ls d2/d22
+DIR	d21	103
+/>******************************* mv file *******************************
+*******************************: Unknown command
+/>cd d2
+/d2>mv ../rf3 d23
+/d2>ls ..
+DIR	d1	3030
+DIR	d2	257
+DIR	d3	0
+FILE	rf1	100
+FILE	rf2	100
+/d2>ls d23
+FILE	rf3	50
+/d2>mv f999 d23
+No such file or directory
+/d2>ls d23
+FILE	rf3	50
+/d2>mv ../d2/d21f1 ../../../..
+No such file or directory
+/d2>ls
+DIR	d21	103
+FILE	d21f1	1
+DIR	d22	103
+DIR	d23	50
+/d2>ls /
+DIR	d1	3030
+DIR	d2	257
+DIR	d3	0
+FILE	rf1	100
+FILE	rf2	100
+/d2>******************************* mv directory *******************************
+*******************************: Unknown command
+/d2>cd /
+/>mv d2 d1
+/>ls
+DIR	d1	3287
+DIR	d3	0
+FILE	rf1	100
+FILE	rf2	100
+/>ls d1
+DIR	d11	0
+DIR	d12	0
+FILE	d1f1	1000
+FILE	d1f2	2000
+FILE	d1f3	30
+DIR	d2	257
+/>ls d2
+The system cannot find the path specified
+/>mv d1/d2 /
+/>ls
+DIR	d1	3030
+DIR	d2	257
+DIR	d3	0
+FILE	rf1	100
+FILE	rf2	100
+/>mv d999 d1
+No such file or directory
+/>ls
+DIR	d1	3030
+DIR	d2	257
+DIR	d3	0
+FILE	rf1	100
+FILE	rf2	100
+/>ls d1
+DIR	d11	0
+DIR	d12	0
+FILE	d1f1	1000
+FILE	d1f2	2000
+FILE	d1f3	30
+/>mv d1 d999
+No such file or directory
+/>ls
+DIR	d1	3030
+DIR	d2	257
+DIR	d3	0
+FILE	rf1	100
+FILE	rf2	100
+/>ls d1
+DIR	d11	0
+DIR	d12	0
+FILE	d1f1	1000
+FILE	d1f2	2000
+FILE	d1f3	30
+/>mkdir d3/d31
+/>cd d3/d31
+/d3/d31>ls
+/d3/d31>mv .. /
+Can't move directory
+/d3/d31>ls
+/d3/d31>ls /
+DIR	d1	3030
+DIR	d2	257
+DIR	d3	0
+FILE	rf1	100
+FILE	rf2	100
+/d3/d31>mv /d3 /d1
+Can't move directory
+/d3/d31>ls
+/d3/d31>ls /d1
+DIR	d11	0
+DIR	d12	0
+FILE	d1f1	1000
+FILE	d1f2	2000
+FILE	d1f3	30
+/d3/d31>ls /
+DIR	d1	3030
+DIR	d2	257
+DIR	d3	0
+FILE	rf1	100
+FILE	rf2	100
+/d3/d31>******************************* rename file *******************************
+*******************************: Unknown command
+/d3/d31>cd /
+/>rename rf1 rf3
+/>rename rf3 rf2
+/>rename f999 rf4
+No such file or directory
+/>ls
+DIR	d1	3030
+DIR	d2	257
+DIR	d3	0
+FILE	rf2	100
+FILE	rf3	100
+/>******************************* rename directory *******************************
+*******************************: Unknown command
+/>rename d1 d4
+/>ls
+DIR	d2	257
+DIR	d3	0
+DIR	d4	3030
+FILE	rf2	100
+FILE	rf3	100
+/>rename /d4 d2
+/>ls
+DIR	d2	257
+DIR	d3	0
+DIR	d4	3030
+FILE	rf2	100
+FILE	rf3	100
+/>rename d9999 d8888
+No such file or directory
+/>ls
+DIR	d2	257
+DIR	d3	0
+DIR	d4	3030
+FILE	rf2	100
+FILE	rf3	100
+/>cd d3/d31
+/d3/d31>rename ../d31 d3333
+Can't rename the working directory
+/d3/d31>******************************* rm file *******************************
+*******************************: Unknown command
+/d3/d31>cd /
+/>rm rf2
+/>ls
+DIR	d2	257
+DIR	d3	0
+DIR	d4	3030
+FILE	rf3	100
+/>rm f9999
+No such file or directory
+/>ls
+DIR	d2	257
+DIR	d3	0
+DIR	d4	3030
+FILE	rf3	100
+/>******************************* rm directory *******************************
+*******************************: Unknown command
+/>rm d2
+/>ls
+DIR	d3	0
+DIR	d4	3030
+FILE	rf3	100
+/>rm d3
+/>rm rf3
+/>ls
+DIR	d4	3030
+/>cd d4
+/d4>rm /d4
+Can't remove directory
+/d4>******************************* history and exec *******************************
+*******************************: Unknown command
+/d4>history
+0	verbose 2
+1	history 
+2	history 
+3	history 
+4	******************************* 0 *******************************
+5	mkfile rf1 100
+6	mkfile rf2 100
+7	mkfile rf3 50
+8	mkdir d1
+9	mkdir d2
+10	mkdir d3
+11	ls 
+12	cd d1
+13	mkfile d1f1 1000
+14	mkfile d1f2 2000
+15	mkfile d1f3 30
+16	mkdir d11
+17	mkdir d12
+18	ls 
+19	cd ../d2
+20	mkdir d21
+21	mkdir d22
+22	mkdir d23
+23	ls 
+24	cd d21
+25	mkfile d21f1 1
+26	mkfile d21f2 2
+27	ls 
+28	******************************* cp file *******************************
+29	cp d21f1 ..
+30	cp d21f1 ..
+31	ls 
+32	cd ..
+33	ls 
+34	cp ../rf1 d21
+35	ls 
+36	cd d21
+37	ls 
+38	cd ../..
+39	ls 
+40	******************************* cp directory *******************************
+41	cp d2/d21 d2/d22
+42	ls 
+43	ls d2
+44	ls d2/d22
+45	******************************* mv file *******************************
+46	cd d2
+47	mv ../rf3 d23
+48	ls ..
+49	ls d23
+50	mv f999 d23
+51	ls d23
+52	mv ../d2/d21f1 ../../../..
+53	ls 
+54	ls /
+55	******************************* mv directory *******************************
+56	cd /
+57	mv d2 d1
+58	ls 
+59	ls d1
+60	ls d2
+61	mv d1/d2 /
+62	ls 
+63	mv d999 d1
+64	ls 
+65	ls d1
+66	mv d1 d999
+67	ls 
+68	ls d1
+69	mkdir d3/d31
+70	cd d3/d31
+71	ls 
+72	mv .. /
+73	ls 
+74	ls /
+75	mv /d3 /d1
+76	ls 
+77	ls /d1
+78	ls /
+79	******************************* rename file *******************************
+80	cd /
+81	rename rf1 rf3
+82	rename rf3 rf2
+83	rename f999 rf4
+84	ls 
+85	******************************* rename directory *******************************
+86	rename d1 d4
+87	ls 
+88	rename /d4 d2
+89	ls 
+90	rename d9999 d8888
+91	ls 
+92	cd d3/d31
+93	rename ../d31 d3333
+94	******************************* rm file *******************************
+95	cd /
+96	rm rf2
+97	ls 
+98	rm f9999
+99	ls 
+100	******************************* rm directory *******************************
+101	rm d2
+102	ls 
+103	rm d3
+104	rm rf3
+105	ls 
+106	cd d4
+107	rm /d4
+108	******************************* history and exec *******************************
+/d4>exec 95
+/>exec 102
+DIR	d4	3030
+/>
