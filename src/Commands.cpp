@@ -309,8 +309,6 @@ string CpCommand::toString() {
     return "cp";
 }
 
-
-//TODO: use move constructor?
 MvCommand::MvCommand(string args): BaseCommand(args) {}
 void MvCommand::execute(FileSystem &fs) {
     string command = TrimArgs(getArgs(), 2);
@@ -341,12 +339,14 @@ void MvCommand::execute(FileSystem &fs) {
                 parent->removeFile((File *) srcFile);
                 desDir->addFile(srcFile);
             } else {
-                if (isPre(fs, (Directory *) srcFile, desDir)) {
+                if (isPre(fs, (Directory *) srcFile, desDir) || isPre(fs, (Directory *) srcFile, &fs.getWorkingDirectory())) {
                     cout << "Can't move directory" << endl;
                 } else {
                     ((Directory *) srcFile) -> setParent(desDir);
                 }
             }
+        } else {
+            cout << "Can't move directory" << endl;
         }
     } else {
         cout << "No such file or directory" << endl;
@@ -373,7 +373,7 @@ void RenameCommand::execute(FileSystem &fs) {
     BaseFile* targetFile = findFile(fs, target);
     if(targetFile){
         if(!targetFile->isFile() && (Directory *) targetFile == &fs.getWorkingDirectory()){
-            cout << "Can't rename working directory" << endl;
+            cout << "Can't rename the working directory" << endl;
         } else {
             //TODO: file name already exist check - print nothing but don't change the name
             Directory *parent;
