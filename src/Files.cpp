@@ -41,14 +41,18 @@ Directory *Directory::getParent() const{
 }
 
 void Directory::setParent(Directory *newParent){
-    parent -> removeFile(this);
+//    parent -> removeFile(this);
     parent = newParent;
-    parent -> addFile(this);
+//    parent -> addFile(this);
 }
 // TODO: add this thing here
 void Directory::addFile(BaseFile* file){
     if(!findChild(file->getName())) {
         children.push_back(file);
+        //TODO: remove after test
+        if(!file->isFile()){
+            ((Directory *) file) -> setParent(this);
+        }
     }
 }
 
@@ -70,6 +74,7 @@ void Directory::removeFile(BaseFile* file){
     while(it != children.end()){
         if(*it == file){
             children.erase(it);
+            it = children.end();
         } else {
             ++it;
         }
@@ -197,6 +202,9 @@ Directory& Directory::operator=(const Directory &other) {
 
 Directory::Directory(Directory &&other):
         BaseFile(other.getName()), children(move(other.children)), parent(other.parent) {
+    other.parent -> removeFile(&other);
+    other.parent -> addFile(this);
+
     other.parent = nullptr;
     if(verbose == 1 || verbose == 3){
         cout << "Directory::Directory(Directory &&other)" << endl;
@@ -206,10 +214,12 @@ Directory::Directory(Directory &&other):
 Directory& Directory::operator=(Directory &&other) {
     if(this != &other){
         clear();
+        other.parent -> removeFile(&other);
+        other.parent -> addFile(this);
         setName(other.getName());
         parent = other.parent;
-        children = move(move(other.children));
         other.parent = nullptr;
+        children = move(other.children);
     }
     if(verbose == 1 || verbose == 3){
         cout << "Directory& Directory::operator=(Directory &&other)" << endl;

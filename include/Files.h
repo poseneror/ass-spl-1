@@ -18,7 +18,7 @@ public:
 	virtual bool isFile() = 0;
 
     // destructor
-    virtual ~BaseFile() = 0;
+    virtual ~BaseFile();
 };
 
 class File : public BaseFile {

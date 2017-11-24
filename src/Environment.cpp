@@ -54,7 +54,7 @@ void Environment::start() {
                 VerboseCommand *cmd = new VerboseCommand(command);
                 cmd -> execute(fs);
                 addToHistory(cmd);
-            } else if(cType == "exec") { //TODO: infinite loop
+            } else if(cType == "exec") {
                 ExecCommand *cmd = new ExecCommand(command, getHistory());
                 cmd->execute(fs);
                 addToHistory(cmd);
@@ -69,7 +69,7 @@ void Environment::start() {
     }
 }
 
-const FileSystem& Environment::getFileSystem() const {
+FileSystem& Environment::getFileSystem() {
     return fs;
 }
 
@@ -88,18 +88,46 @@ void Environment::clear() {
     }
 }
 void Environment::copy(const Environment &other) {
+    fs = *new FileSystem(other.fs);
     for(vector<BaseCommand*>::const_iterator it = other.commandsHistory.begin();
         it != other.commandsHistory.end(); ++it){
-        commandsHistory.push_back((*it));
+        string cType = (*it) -> toString();
+        BaseCommand *copy;
+        if(cType == "pwd") {
+            copy = new PwdCommand((*it) -> getArgs());
+        } else if(cType == "cd") {
+            copy = new CdCommand((*it) -> getArgs());
+        } else if(cType == "ls") {
+            copy = new LsCommand((*it) -> getArgs());
+        } else if(cType == "mkdir"){
+            copy = new MkdirCommand((*it) -> getArgs());
+        } else if(cType == "mkfile"){
+            copy = new MkfileCommand((*it) -> getArgs());
+        } else if(cType == "cp"){
+            copy = new CpCommand((*it) -> getArgs());
+        } else if(cType == "mv"){
+            copy = new MvCommand((*it) -> getArgs());
+        } else if(cType == "rename"){
+            copy = new RenameCommand((*it) -> getArgs());
+        } else if(cType == "rm"){
+            copy = new RmCommand((*it) -> getArgs());
+        } else if(cType == "history") {
+            copy = new HistoryCommand((*it) -> getArgs(), commandsHistory);
+        } else if(cType == "verbose") {
+            copy = new VerboseCommand((*it) -> getArgs());
+        } else if(cType == "exec") {
+            copy = new ExecCommand((*it) -> getArgs(), commandsHistory);
+        } else {
+            copy = new ErrorCommand((*it) -> getArgs());
+        }
+        commandsHistory.push_back(copy);
     }
-    fs = *new FileSystem(other.getFileSystem());
 }
 
 Environment::~Environment() { clear(); }
 
 Environment::Environment(const Environment &other): commandsHistory(), fs() { copy(other); }
 
-//TODO: ????
 Environment::Environment(Environment &&other): commandsHistory(), fs() {
     commandsHistory = other.commandsHistory;
     fs = other.getFileSystem();

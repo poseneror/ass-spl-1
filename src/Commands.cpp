@@ -298,6 +298,7 @@ void CpCommand::execute(FileSystem &fs) {
                 } else {
                     Directory *copy = new Directory(*(Directory *) srcFile);
                     copy->setParent(desDir);
+                    desDir->addFile(copy);
                 }
             }
         }
@@ -336,12 +337,14 @@ void MvCommand::execute(FileSystem &fs) {
                     parent = (Directory *) findFile(fs, src.substr(0, s));
                 }
                 // HERE
-                parent->removeFile((File *) srcFile);
-                desDir->addFile(srcFile);
+                parent -> removeFile((File *) srcFile);
+                desDir -> addFile(srcFile);
             } else {
                 if (isPre(fs, (Directory *) srcFile, desDir) || isPre(fs, (Directory *) srcFile, &fs.getWorkingDirectory())) {
                     cout << "Can't move directory" << endl;
                 } else {
+                    ((Directory *) srcFile) -> getParent() -> removeFile(srcFile);
+                    desDir -> addFile(srcFile);
                     ((Directory *) srcFile) -> setParent(desDir);
                 }
             }
